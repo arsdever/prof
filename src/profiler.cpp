@@ -1,6 +1,5 @@
 #include "profiler.hpp"
 
-#include "profiler_data_collector.hpp"
 #include "scoped_profiler.hpp"
 
 namespace prof
@@ -10,48 +9,41 @@ namespace prof
         std::mutex profiler_mutex;
     }
 
-    scoped_profiler profiler::profile(std::string_view fname, std::string const& thid)
+    scoped_profiler profiler::profile(std::string_view fname)
     {
-        return { implementation(), fname };
+        std::string thid = std::to_string(std::this_thread::get_id());
+        return { for_thread(std::move(thid)), fname };
     }
 
-    std::shared_ptr<profiler_data_collector> profiler::get_collector(std::string_view thid)
+    profiler& profiler::for_thread(std::string_view thid)
     {
-        std::lock_guard<std::mutex> guard { _mutex };
-        std::string                 key { thid };
-        auto                        it { _collectors.find(key) };
-        if (it == _collectors.end())
+        std::lock_guard<std::mutex> guard { _thd_mutex };
+        auto                        it = _profilers.find(name_t { thid });
+        if (it == _profilers.end())
             {
-                it =
-                    _collectors.insert(std::make_pair(key, std::make_shared<profiler_data_collector>(implementation())))
-                        .first;
+                it = _profilers
+                         .emplace(std::make_pair(name_t { thid }, std::unique_ptr<profiler> { new profiler { thid } }))
+                         .first;
             }
 
-        return it->second;
+        return *it->second.get();
     }
 
-    // std::shared_ptr<profiler_data_collector> profiler::get_data_collector(std::string_view thid)
-    //{
-    //     return implementation().get_collector(thid);
-    // }
-
-    void profiler::dump(std::ostream& s)
+    profiler::profiler(std::string_view thid) noexcept
+        : _id { thid }
     {
-        std::for_each(_data.begin(), _data.end(), [ &s ](data_t const& f) {
-            s << f.name() << " : " << f.depth() << " : " << f.diff() << std::endl;
+    }
+
+    void profiler::dump(std::ostream& s) const
+    {
+        std::for_each(_data.begin(), _data.end(), [ id = _id, &s ](data_t const& f) {
+            s << "[ thread " << id << "] " << f.name() << " : " << f.depth() << " : " << f.diff() << std::endl;
         });
     }
 
-    profiler& profiler::implementation()
+    void profiler::dump_all_threads(std::ostream& s)
     {
-        std::lock_guard<std::mutex> guard { profiler_mutex };
-        return *_impl;
-    }
-
-    void profiler::set_implementation(std::unique_ptr<profiler>&& impl)
-    {
-        std::lock_guard<std::mutex> guard { profiler_mutex };
-        _impl = std::move(impl);
+        std::for_each(_profilers.begin(), _profilers.end(), [ &s ](auto const& p) { p.second->dump(s); });
     }
 
     void profiler::push_data(data_t const& d) { _data.insert(d); }
@@ -61,12 +53,12 @@ namespace prof
     void profiler::pop_frame()
     {
         _data_stack.top().stop();
-        _data.insert(std::move(_data_stack.top()));
+        _data.emplace(std::move(_data_stack.top()));
         _data_stack.pop();
     }
 
-    profiler::data_t::depth_t profiler::current_depth() const { return _data.size(); }
+    std::unordered_map<profiler::name_t, std::unique_ptr<profiler>> profiler::_profilers;
 
-    std::unique_ptr<profiler> profiler::_impl {};
+    std::mutex profiler::_thd_mutex;
 
 } // namespace prof

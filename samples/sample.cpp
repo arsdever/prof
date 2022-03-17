@@ -1,22 +1,17 @@
 #include <iostream>
 #include <profiler.hpp>
-#include <profiler_data_collector.hpp>
 #include <scoped_profiler.hpp>
 
 class unit
 {
 public:
-    unit()
-    {
-        // _profiler.register_function(0, "long_running_task");
-        // _profiler.register_function(1, "slow_motion");
-    }
+    unit() { }
 
     void slow_motion()
     {
-        auto p = prof::profiler::profile(__func__);
+        auto       p = prof::profiler::profile(__func__);
         static int a[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        while (std::ranges::next_permutation(a).found) { } // generates 12! permutations
+        while (std::ranges::next_permutation(a).found) { }
     }
 
     std::string long_running_task(int n = 10)
@@ -41,18 +36,19 @@ public:
 
         return long_running_task_2branch(n - 1) + long_running_task_2branch(n - 2);
     }
-
-public:
-    prof::profiler _profiler;
 };
 
 int main(int argc, char** argv)
 {
-    prof::profiler::set_implementation(std::move(std::make_unique<prof::profiler>()));
     unit u {};
     std::cout << u.long_running_task() << std::endl;
-    std::cout << u.long_running_task_2branch() << std::endl;
     u.slow_motion();
-    prof::profiler::implementation().dump(std::cout);
+    std::thread t1 { [ &u ]() { std::cout << u.long_running_task_2branch() << std::endl; } };
+    std::thread t2 { [ &u ]() { std::cout << u.long_running_task_2branch() << std::endl; } };
+    std::thread t3 { [ &u ]() { std::cout << u.long_running_task_2branch() << std::endl; } };
+    t1.join();
+    t2.join();
+    t3.join();
+    prof::profiler::dump_all_threads(std::cout);
     return 0;
 }

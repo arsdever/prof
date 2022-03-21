@@ -1,6 +1,7 @@
 #pragma once
 
 #include <frame.hpp>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -23,6 +24,7 @@ namespace std
 
 namespace prof
 {
+
     class profiler_data_collector;
     class scoped_profiler;
 
@@ -39,11 +41,14 @@ namespace prof
         using name_t = std::string;
         using ptr_t  = std::unique_ptr<profiler>;
 
-        static scoped_profiler profile(std::string_view fname);
-        static profiler&       for_thread(std::string_view thid);
-        static void            set_implementation(std::unique_ptr<profiler>&& impl);
-        static void            dump_all_threads(std::ostream& s);
-        void                   dump(std::ostream& s) const;
+        static scoped_profiler              profile(std::string_view fname);
+        static profiler&                    for_thread(std::string_view thid);
+        static void                         set_implementation(std::unique_ptr<profiler>&& impl);
+        static void                         dump_all_threads(std::ostream& s);
+        void                                dump(std::ostream& s) const;
+        void                                for_each_data(std::function<void(const data_t&)> e) const;
+        static void                         for_each(std::function<void(const profiler&)> e);
+        std::chrono::steady_clock::duration start_time() const;
 
     protected:
         profiler(std::string_view thid) noexcept;
@@ -53,11 +58,13 @@ namespace prof
 
         friend class scoped_profiler;
 
-        static map_t<name_t, ptr_t> _profilers;
-        static std::mutex           _thd_mutex;
-        stack_t<data_t>             _data_stack;
-        set_t<data_t>               _data;
-        std::mutex                  _mutex;
-        name_t                      _id;
+        static map_t<name_t, ptr_t>         _profilers;
+        static std::mutex                   _thd_mutex;
+        stack_t<data_t>                     _data_stack;
+        set_t<data_t>                       _data;
+        std::mutex                          _mutex;
+        name_t                              _id;
+        std::chrono::steady_clock::duration _start_time;
     };
+
 } // namespace prof

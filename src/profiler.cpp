@@ -24,6 +24,7 @@ namespace prof
                 it = _profilers
                          .emplace(std::make_pair(name_t { thid }, std::unique_ptr<profiler> { new profiler { thid } }))
                          .first;
+                it->second->_start_time = std::chrono::steady_clock::now().time_since_epoch();
             }
 
         return *it->second.get();
@@ -45,6 +46,18 @@ namespace prof
     {
         std::for_each(_profilers.begin(), _profilers.end(), [ &s ](auto const& p) { p.second->dump(s); });
     }
+
+    void profiler::for_each_data(std::function<void(const data_t&)> e) const
+    {
+        std::for_each(_data.begin(), _data.end(), [ e ](data_t const& f) { e(f); });
+    }
+
+    void profiler::for_each(std::function<void(const profiler&)> e)
+    {
+        std::for_each(_profilers.begin(), _profilers.end(), [ e ](auto const& p) { e(*p.second); });
+    }
+
+    std::chrono::steady_clock::duration profiler::start_time() const { return _start_time; }
 
     void profiler::push_data(data_t const& d) { _data.insert(d); }
 

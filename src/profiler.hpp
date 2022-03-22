@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <scoped_profiler.hpp>
 #include <sstream>
 #include <stack>
 #include <unordered_map>

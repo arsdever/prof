@@ -84,12 +84,12 @@ namespace prof
                 std::string name;
                 size_t      data_count;
                 in >> name >> data_count;
-                std::unique_ptr<profiler> p { new profiler{name} };
+                std::unique_ptr<profiler> p { new profiler { name } };
                 while (data_count--)
                     {
                         p->_data.emplace(data_t::load(in));
                     }
-                uint64_t dur;
+                double dur;
                 in >> dur;
                 p->_start_time = std::chrono::steady_clock::duration { dur };
                 _profilers.emplace(std::make_pair(p->_id, std::move(p)));
@@ -107,7 +107,7 @@ namespace prof
                     {
                         data_t::save(out, d);
                     }
-                out << std::chrono::duration_cast<std::chrono::duration<uint64_t>>(p.second->_start_time).count() << ' ';
+                out << std::chrono::duration_cast<std::chrono::duration<double>>(p.second->_start_time).count() << ' ';
             }
     }
 

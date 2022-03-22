@@ -25,17 +25,17 @@ namespace prof
 
     void frame::save(std::ostream& o, frame const& f)
     {
-        o << f._name << ' '<< f._depth << ' '
-          << std::chrono::duration_cast<std::chrono::duration<uint64_t>>(f._start.time_since_epoch()).count() << ' '
-          << std::chrono::duration_cast<std::chrono::duration<uint64_t>>(f._stop.time_since_epoch()).count() << ' ';
+        o << f._name << ' ' << f._depth << ' '
+          << std::chrono::duration_cast<std::chrono::duration<double>>(f._start.time_since_epoch()).count() << ' '
+          << std::chrono::duration_cast<std::chrono::duration<double>>(f._stop.time_since_epoch()).count() << ' ';
     }
 
     frame frame::load(std::istream& i)
     {
         std::string name;
         depth_t     depth;
-        uint64_t    start;
-        uint64_t    end;
+        double      start;
+        double      end;
         i >> name >> depth >> start >> end;
         frame result { name, depth };
         result._start = std::chrono::steady_clock::time_point { std::chrono::steady_clock::duration { start } };

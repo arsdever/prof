@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <chrono>
 #include <string>
 
@@ -21,6 +22,9 @@ namespace prof
         std::chrono::steady_clock::time_point end() const;
 
         bool operator==(frame const& o) const;
+
+        static void save(std::ostream& o, frame const& f);
+        static frame load(std::istream& i);
 
     private:
         std::string                           _name;

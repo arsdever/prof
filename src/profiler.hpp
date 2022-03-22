@@ -51,6 +51,9 @@ namespace prof
         static void                         for_each(std::function<void(const profiler&)> e);
         std::chrono::steady_clock::duration start_time() const;
 
+        static void load(std::istream& buffer);
+        static void save(std::ostream& buffer);
+
     protected:
         profiler(std::string_view thid) noexcept;
         void push_data(data_t const& d);

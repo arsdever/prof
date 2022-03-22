@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <profiler.hpp>
 #include <scoped_profiler.hpp>
@@ -50,5 +51,12 @@ int main(int argc, char** argv)
     t2.join();
     t3.join();
     prof::profiler::dump_all_threads(std::cout);
+
+    std::ofstream sfile { "output.dmp" };
+    prof::profiler::save(sfile);
+
+    std::ifstream rfile { "output.dmp" };
+    prof::profiler::load(rfile);
+
     return 0;
 }

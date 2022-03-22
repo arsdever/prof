@@ -74,4 +74,41 @@ namespace prof
 
     std::mutex profiler::_thd_mutex;
 
+    void profiler::load(std::istream& in)
+    {
+        std::lock_guard<std::mutex> guard { _thd_mutex };
+        size_t                      count;
+        in >> count;
+        while (count--)
+            {
+                std::string name;
+                size_t      data_count;
+                in >> name >> data_count;
+                std::unique_ptr<profiler> p { new profiler{name} };
+                while (data_count--)
+                    {
+                        p->_data.emplace(data_t::load(in));
+                    }
+                uint64_t dur;
+                in >> dur;
+                p->_start_time = std::chrono::steady_clock::duration { dur };
+                _profilers.emplace(std::make_pair(p->_id, std::move(p)));
+            }
+    }
+
+    void profiler::save(std::ostream& out)
+    {
+        std::lock_guard<std::mutex> guard { _thd_mutex };
+        out << _profilers.size() << ' ';
+        for (auto const& p : _profilers)
+            {
+                out << p.second->_id << ' ' << p.second->_data.size() << ' ';
+                for (auto const& d : p.second->_data)
+                    {
+                        data_t::save(out, d);
+                    }
+                out << std::chrono::duration_cast<std::chrono::duration<uint64_t>>(p.second->_start_time).count() << ' ';
+            }
+    }
+
 } // namespace prof

@@ -2,6 +2,8 @@
 
 #include "scoped_profiler.hpp"
 
+using namespace std::chrono;
+
 namespace prof
 {
     namespace
@@ -24,7 +26,7 @@ namespace prof
                 it = _profilers
                          .emplace(std::make_pair(name_t { thid }, std::unique_ptr<profiler> { new profiler { thid } }))
                          .first;
-                it->second->_start_time = std::chrono::steady_clock::now().time_since_epoch();
+                it->second->_start_time = steady_clock::now().time_since_epoch();
             }
 
         return *it->second.get();
@@ -57,7 +59,7 @@ namespace prof
         std::for_each(_profilers.begin(), _profilers.end(), [ e ](auto const& p) { e(*p.second); });
     }
 
-    std::chrono::steady_clock::duration profiler::start_time() const { return _start_time; }
+    steady_clock::duration profiler::start_time() const { return _start_time; }
 
     void profiler::push_data(data_t const& d) { _data.insert(d); }
 
@@ -91,7 +93,7 @@ namespace prof
                     }
                 double dur;
                 in >> dur;
-                p->_start_time = std::chrono::steady_clock::duration { dur };
+                p->_start_time = duration_cast<steady_clock::duration>(duration<double> { dur });
                 _profilers.emplace(std::make_pair(p->_id, std::move(p)));
             }
     }
@@ -107,7 +109,7 @@ namespace prof
                     {
                         data_t::save(out, d);
                     }
-                out << std::chrono::duration_cast<std::chrono::duration<double>>(p.second->_start_time).count() << ' ';
+                out << duration_cast<duration<double>>(p.second->_start_time).count() << ' ';
             }
     }
 

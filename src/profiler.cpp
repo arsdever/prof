@@ -1,4 +1,5 @@
 #include "profiler.hpp"
+#include <iomanip>
 
 #include "scoped_profiler.hpp"
 
@@ -101,7 +102,7 @@ namespace prof
     void profiler::save(std::ostream& out)
     {
         std::lock_guard<std::mutex> guard { _thd_mutex };
-        out << _profilers.size() << ' ';
+        out << std::setprecision(50) << _profilers.size() << ' ';
         for (auto const& p : _profilers)
             {
                 out << p.second->_id << ' ' << p.second->_data.size() << ' ';

@@ -35,6 +35,7 @@ namespace prof
 
     profiler::profiler(std::string_view thid) noexcept
         : _id { thid }
+        , _data{100, data_t{}}
     {
     }
 
@@ -62,14 +63,25 @@ namespace prof
 
     steady_clock::duration profiler::start_time() const { return _start_time; }
 
-    void profiler::push_data(data_t const& d) { _data.insert(d); }
+    void profiler::push_data(data_t const& d) { if (_current_data_index >= _max_size)
+    {
+        _current_data_index = 0;
+    }
+
+    if (_data.size() <= _current_data_index)
+    {
+        _data.resize(_current_data_index * 2 > _max_size ? _current_data_index * 2 : _max_size);
+    }
+
+    _data[ _current_data_index ] = d;
+    }
 
     void profiler::push_frame(std::string_view func) { _data_stack.push({ std::string { func }, _data_stack.size() }); }
 
     void profiler::pop_frame()
     {
         _data_stack.top().stop();
-        _data.emplace(std::move(_data_stack.top()));
+        push_data(_data_stack.top());
         _data_stack.pop();
     }
 
@@ -90,7 +102,7 @@ namespace prof
                 std::unique_ptr<profiler> p { new profiler { name } };
                 while (data_count--)
                     {
-                        p->_data.emplace(data_t::load(in));
+                        p->push_data(data_t::load(in));
                     }
                 double dur;
                 in >> dur;

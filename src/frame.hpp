@@ -17,7 +17,7 @@ namespace prof
         void                          stop();
         std::chrono::duration<double> diff() const;
 
-        std::string_view                      name() const;
+        std::string                           name() const;
         depth_t                               depth() const;
         std::chrono::steady_clock::time_point start() const;
         std::chrono::steady_clock::time_point end() const;

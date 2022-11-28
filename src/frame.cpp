@@ -15,7 +15,7 @@ namespace prof
 
     duration<double> frame::diff() const { return duration<double>(_stop - _start); }
 
-    std::string_view frame::name() const { return _name; }
+    std::string frame::name() const { return _name; }
 
     frame::depth_t frame::depth() const { return _depth; }
 

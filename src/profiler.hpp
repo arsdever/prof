@@ -38,7 +38,7 @@ namespace prof
         template <typename T>
         using stack_t = std::stack<T>;
         template <typename T>
-        using set_t  = std::unordered_set<T>;
+        using set_t  = std::vector<T>;
         using name_t = std::string;
         using ptr_t  = std::unique_ptr<profiler>;
 
@@ -64,8 +64,10 @@ namespace prof
 
         static map_t<name_t, ptr_t>         _profilers;
         static std::mutex                   _thd_mutex;
+        static constexpr size_t _max_size {20000};
         stack_t<data_t>                     _data_stack;
         set_t<data_t>                       _data;
+        size_t _current_data_index{0};
         std::mutex                          _mutex;
         name_t                              _id;
         std::chrono::steady_clock::duration _start_time;

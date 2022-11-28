@@ -12,6 +12,7 @@ namespace prof
         using depth_t = uint64_t;
 
     public:
+        frame() = default;
         frame(std::string const& name, depth_t depth);
         void                          stop();
         std::chrono::duration<double> diff() const;

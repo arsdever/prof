@@ -64,7 +64,7 @@ namespace prof
 
         static map_t<name_t, ptr_t>         _profilers;
         static std::mutex                   _thd_mutex;
-        static constexpr size_t _max_size {20000};
+        static constexpr size_t _max_size {2000};
         stack_t<data_t>                     _data_stack;
         set_t<data_t>                       _data;
         size_t _current_data_index{0};

@@ -1,5 +1,6 @@
-#include "profiler.hpp"
 #include <iomanip>
+
+#include "profiler.hpp"
 
 #include "scoped_profiler.hpp"
 
@@ -35,8 +36,8 @@ namespace prof
 
     profiler::profiler(std::string_view thid) noexcept
         : _id { thid }
-        , _data{100, data_t{}}
     {
+        _data.resize(_max_size);
     }
 
     void profiler::dump(std::ostream& s) const
@@ -63,17 +64,14 @@ namespace prof
 
     steady_clock::duration profiler::start_time() const { return _start_time; }
 
-    void profiler::push_data(data_t const& d) { if (_current_data_index >= _max_size)
+    void profiler::push_data(data_t const& d)
     {
-        _current_data_index = 0;
-    }
+        if (_current_data_index >= _max_size)
+            {
+                _current_data_index = 0;
+            }
 
-    if (_data.size() <= _current_data_index)
-    {
-        _data.resize(_current_data_index * 2 > _max_size ? _current_data_index * 2 : _max_size);
-    }
-
-    _data[ _current_data_index ] = d;
+        _data[ _current_data_index++ ] = d;
     }
 
     void profiler::push_frame(std::string_view func) { _data_stack.push({ std::string { func }, _data_stack.size() }); }

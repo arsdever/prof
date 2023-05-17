@@ -1,9 +1,12 @@
-add_library (profiler STATIC
-	${CMAKE_CURRENT_SOURCE_DIR}/profiler.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/profiler.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/frame.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/frame.hpp
-	${CMAKE_CURRENT_SOURCE_DIR}/scoped_profiler.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/scoped_profiler.hpp
-)
-target_include_directories (profiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(
+  profiler_lib STATIC
+  profiler.cpp
+  frame.cpp
+  profiler_scope_keeper.cpp
+  thread_local_profiler.cpp
+  thread_local_profiler.hpp
+  profiler_manager.cpp
+  profiler_manager.hpp)
+add_library(profiler::lib ALIAS profiler_lib)
+
+target_link_libraries(profiler_lib PUBLIC profiler::interface)

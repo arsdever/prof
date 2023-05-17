@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <profiler.hpp>
-#include <scoped_profiler.hpp>
+#include <profiler_scope_keeper.hpp>
 
 class unit
 {

@@ -1,7 +1,7 @@
 add_library(
   profiler_lib STATIC
   profiler.cpp
-  frame.cpp
+  data.cpp
   profiler_scope_keeper.cpp
   thread_local_profiler.cpp
   thread_local_profiler.hpp

@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "prof/frame.hpp"
+#include "prof/data.hpp"
 #include "prof/profiler_scope_keeper.hpp"
 
 namespace prof
@@ -30,6 +30,8 @@ namespace prof
          */
         static profiler_scope_keeper start_profiling(std::string_view function_name);
 
+        static profiler_scope_keeper start_frame(std::string_view function_name);
+
         /**
          * @brief Get the thread specific profiler for the given thread id.
          *
@@ -44,7 +46,7 @@ namespace prof
          * @param operation the operation to apply to the data.
          * @return true if the operation was executed for all of the data available, false otherwise.
          */
-        static bool apply_for_data(std::string_view thread_id, std::function<bool(const frame&)> operation);
+        static bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
 
         /**
          * @brief Get the vector of threads that have been profiled.

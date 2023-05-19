@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-#include "prof/frame.hpp"
+#include "prof/data.hpp"
 #include "prof/profiler_scope_keeper.hpp"
 
 namespace prof
@@ -32,6 +32,8 @@ namespace prof
      */
     extern profiler_scope_keeper profile(std::string_view function_name);
 
+    extern profiler_scope_keeper profile_frame(std::string_view function_name);
+
     /**
      * @brief Get the vector of threads that have been profiled.
      *
@@ -52,6 +54,6 @@ namespace prof
      * @param operation the operation to apply to the data.
      * @return true if the operation was executed for all of the data available, false otherwise.
      */
-    extern bool apply_for_data(std::string_view thread_id, std::function<bool(const frame&)> operation);
+    extern bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
 
 } // namespace prof

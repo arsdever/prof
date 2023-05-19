@@ -1,15 +1,28 @@
 #pragma once
 
 #include <functional>
+#include <memory>
+#include <deque>
 #include <stack>
 #include <string>
 #include <string_view>
 
 #include "base_profiler.hpp"
-#include "prof/frame.hpp"
+#include "prof/data.hpp"
 
 namespace prof
 {
+
+    class thread_local_profiler;
+
+    struct frame_keeper : base_profiler
+    {
+        thread_local_profiler& _ref;
+        std::string            _function_name;
+        frame_keeper(thread_local_profiler& ref, std::string function_name);
+
+        void finish() override;
+    };
 
     class profiler_scope_keeper;
 
@@ -79,11 +92,24 @@ namespace prof
         profiler_scope_keeper stack_push(std::string_view function_name);
 
         /**
+         * @brief Starts profiling of a new frame.
+         *
+         * @param function_name the name of the function the thread runs into.
+         * @return a @c profiler_scope_keeper the scope keeper object.
+         */
+        profiler_scope_keeper frame_push(std::string_view function_name);
+
+        /**
          * @brief Pops the last stack frame from the profiler.
          * This function is used to pop the last stack frame from the profiler. It is called automatically by the @c
          * profiler_scope_keeper object returned by the @c stack_push function.
          */
         void stack_pop();
+
+        /**
+         * @brief Finishes the current frame.
+         */
+        void frame_pop();
 
         /**
          * @brief Executes a function for each frame in the profiler.
@@ -95,7 +121,7 @@ namespace prof
          * @param operation to perform for each frame.
          * @returns true if the operation was executed for all of the frames, false otherwise.
          */
-        bool for_each_data(std::function<bool(const frame&)> operation) const;
+        bool for_each_data(std::function<bool(const data_sample&)> operation) const;
 
 #pragma region base_profiler
 
@@ -107,9 +133,11 @@ namespace prof
 
 #pragma endregion
 
-        std::string        _id;
-        std::stack<frame>  _stack;
-        std::vector<frame> _records;
+        std::string             _id;
+        std::stack<data_sample> _stack;
+        std::deque<frame>      _frames;
+        friend class frame_keeper;
+        std::unique_ptr<frame_keeper> _frame_keeper;
     };
 
 } // namespace prof

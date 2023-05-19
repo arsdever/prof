@@ -1,4 +1,4 @@
-add_library(profiler_interface INTERFACE prof/profiler.hpp prof/frame.hpp
+add_library(profiler_interface INTERFACE prof/profiler.hpp prof/data.hpp
             prof/profiler_scope_keeper.hpp)
 add_library(profiler::interface ALIAS profiler_interface)
 

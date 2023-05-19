@@ -30,6 +30,12 @@ namespace prof
         return thread_profiler->stack_push(function_name);
     }
 
+    profiler_scope_keeper profiler_manager::start_frame(std::string_view function_name)
+    {
+        auto thread_profiler = for_thread(std::to_string(std::this_thread::get_id()));
+        return thread_profiler->frame_push(function_name);
+    }
+
     std::shared_ptr<thread_local_profiler> profiler_manager::for_thread(std::string_view thread_id)
     {
         std::lock_guard<std::mutex> lock { thread_specific_profiler_mutex };
@@ -45,7 +51,7 @@ namespace prof
         return _thread_profilers[ std::hash<std::string_view> {}(thread_id) ];
     }
 
-    bool profiler_manager::apply_for_data(std::string_view thread_name, std::function<bool(const frame&)> e)
+    bool profiler_manager::apply_for_data(std::string_view thread_name, std::function<bool(const data_sample&)> e)
     {
         auto thread_profiler = for_thread(thread_name);
         return thread_profiler->for_each_data(e);

@@ -1,5 +1,7 @@
 #include "profiler_manager.hpp"
 
+#include <thread>
+
 #include "thread_local_profiler.hpp"
 
 namespace std

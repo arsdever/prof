@@ -136,7 +136,7 @@ namespace prof
         std::string             _id;
         std::stack<data_sample> _stack;
         std::deque<frame>      _frames;
-        friend class frame_keeper;
+        friend struct frame_keeper;
         std::unique_ptr<frame_keeper> _frame_keeper;
     };
 

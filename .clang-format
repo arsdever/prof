@@ -43,7 +43,6 @@ BraceWrapping:
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: GNU
 BreakBeforeInheritanceComma: true
-BreakBeforeTernaryOperators: false
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 BreakBeforeTernaryOperators: true
@@ -135,4 +134,3 @@ TabWidth:        4
 UseCRLF:         false
 UseTab:          Never
 ...
-

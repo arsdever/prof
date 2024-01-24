@@ -56,4 +56,13 @@ namespace prof
      */
     extern bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
 
+    struct draw_data
+    {
+        int width;
+        int height;
+        double zoom_x = 300.0f;
+        double zoom_y = 0.1f;
+    };
+    extern void draw_frame_data(std::string_view thread_id, const draw_data& dd);
+
 } // namespace prof

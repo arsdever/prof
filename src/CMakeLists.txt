@@ -10,3 +10,8 @@ add_library(
 add_library(profiler::lib ALIAS profiler_lib)
 
 target_link_libraries(profiler_lib PUBLIC profiler::interface)
+
+if(PROF_OPENGL)
+  target_sources(profiler_lib PUBLIC opengl/drawer.cpp opengl/shader.hpp)
+  target_link_libraries(profiler_lib PUBLIC GLAD)
+endif()

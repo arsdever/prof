@@ -62,6 +62,11 @@ namespace prof
 
     bool thread_local_profiler::for_each_data(std::function<bool(const data_sample&)> operation) const
     {
+        if (_frames.empty())
+        {
+            return true;
+        }
+
         for (int i = 0; i < _frames.back().samples().size(); ++i)
             {
                 data_sample const& f = _frames.back().samples()[ i ];

@@ -48,12 +48,20 @@ namespace prof
     public:
         frame();
 
-        void add(data_sample sample);
-        std::vector<data_sample> const& samples() const;
+        void                                  add(data_sample sample);
+        std::vector<data_sample> const&       samples() const;
+        void                                  mark_finished();
+        bool                                  is_finished() const;
+        id_t                                  get_id() const;
+        std::chrono::steady_clock::time_point start() const;
+        std::chrono::steady_clock::time_point end() const;
 
     private:
-        std::vector<data_sample> _frame_data;
-        id_t                     _id;
+        std::vector<data_sample>              _frame_data;
+        id_t                                  _id;
+        bool                                  _finished { false };
+        std::chrono::steady_clock::time_point _start;
+        std::chrono::steady_clock::time_point _stop;
 
         static id_t _id_counter;
     };

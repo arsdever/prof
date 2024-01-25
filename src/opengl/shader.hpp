@@ -5,7 +5,55 @@
 namespace prof
 {
 
-    static constexpr std::string_view vertex_shader = R"glsl(
+    struct overall_shaders
+    {
+        static constexpr std::string_view vertex_shader = R"glsl(
+#version 330 core
+
+struct section
+{
+    float time;
+};
+
+layout(location = 0) in vec2 _vertex_position;
+uniform vec2 zoom;
+uniform vec2 _screen_size;
+uniform vec2 _screen_offset;
+uniform int _frame_offset;
+uniform section _sections[ 256 ];
+
+void main()
+{
+    float   time_offset     = 0;
+    vec2    pos             = _vertex_position;
+    section current_section = _sections[ gl_InstanceID ];
+    pos.x *= zoom.x;
+    pos.x += (gl_InstanceID + _frame_offset * 256) * zoom.x;
+    pos.y *= zoom.y;
+    pos.y += current_section.time * zoom.y;
+    pos.x *= _screen_size.y / _screen_size.x;
+    pos.y = 1 - pos.y;
+    gl_Position = vec4((pos - 0.5) * 2.0, 0.0, 1.0);
+}
+	)glsl";
+
+        static constexpr std::string_view fragment_shader = R"glsl(
+#version 330 core
+out vec4    _fragment_color;
+
+vec3 hsl2rgb(in vec3 c)
+{
+    vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    return c.z + c.y * (rgb - 0.5) * (1.0 - abs(2.0 * c.z - 1.0));
+}
+
+void main() { _fragment_color = vec4(hsl2rgb(vec3(0.4, 0.73, 0.4)), 1.0); }
+	)glsl";
+    };
+
+    struct frame_shaders
+    {
+        static constexpr std::string_view vertex_shader = R"glsl(
 #version 330 core
 
 struct section
@@ -38,7 +86,7 @@ void main()
 }
 	)glsl";
 
-    static constexpr std::string_view fragment_shader = R"glsl(
+        static constexpr std::string_view fragment_shader = R"glsl(
 #version 330 core
 out vec4    _fragment_color;
 flat in int _instanceID;
@@ -53,5 +101,6 @@ vec3 hsl2rgb(in vec3 c)
 
 void main() { _fragment_color = vec4(hsl2rgb(vec3(rand(vec2(_instanceID, 256 - _instanceID)), 1.0, 0.5)), 1.0); }
 	)glsl";
+    };
 
 } // namespace prof

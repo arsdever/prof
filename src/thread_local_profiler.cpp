@@ -25,7 +25,7 @@ namespace prof
     {
         _frame_keeper = std::make_unique<frame_keeper>(*this, std::string { function_name });
         _stack.emplace(std::string { function_name }, _stack.size());
-        if (_frames.size() > 10)
+        if (_frames.size() > 2000)
             {
                 _frames.erase(_frames.begin());
             }
@@ -56,25 +56,69 @@ namespace prof
                 _frames.back().add(std::move(_stack.top()));
                 _stack.pop();
             }
+        _frames.back().mark_finished();
     }
 
     void thread_local_profiler::finish() { stack_pop(); }
 
+    bool thread_local_profiler::for_each_frame(std::function<bool(const frame&)> operation) const
+    {
+        for (const auto& fr : _frames)
+            {
+                if (!fr.is_finished())
+                    {
+                        continue;
+                    }
+
+                if (!operation(fr))
+                    {
+                        return false;
+                    }
+            }
+        return true;
+    }
+
     bool thread_local_profiler::for_each_data(std::function<bool(const data_sample&)> operation) const
     {
-        if (_frames.empty())
-        {
+        return for_each_frame([ operation ](const frame& fr) {
+            if (!fr.is_finished())
+                {
+                    return true;
+                }
+
+            for (int i = 0; i < fr.samples().size(); ++i)
+                {
+                    const data_sample& ds = fr.samples()[ i ];
+                    if (!operation(ds))
+                        return false;
+                }
+
             return true;
-        }
+        });
+    }
 
-        for (int i = 0; i < _frames.back().samples().size(); ++i)
-            {
-                data_sample const& f = _frames.back().samples()[ i ];
-                if (!operation(f))
-                    return false;
-            }
+    bool thread_local_profiler::for_each_data_frame(uint64_t                                frame_id,
+                                                    std::function<bool(const data_sample&)> operation) const
+    {
+        return for_each_frame([ frame_id, operation ](const frame& fr) {
+            if (fr.get_id() != frame_id)
+                {
+                    return true;
+                }
+            if (!fr.is_finished())
+                {
+                    return true;
+                }
 
-        return true;
+            for (int i = 0; i < fr.samples().size(); ++i)
+                {
+                    const data_sample& ds = fr.samples()[ i ];
+                    if (!operation(ds))
+                        return false;
+                }
+
+            return true;
+        });
     }
 
 } // namespace prof

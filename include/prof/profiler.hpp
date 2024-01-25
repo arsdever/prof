@@ -43,6 +43,7 @@ namespace prof
      */
     extern std::vector<std::string> known_threads();
 
+    extern bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> operation);
     /**
      * @brief Applies the operation to all of the data available for the given thread.
      *
@@ -54,15 +55,19 @@ namespace prof
      * @param operation the operation to apply to the data.
      * @return true if the operation was executed for all of the data available, false otherwise.
      */
-    extern bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
+    extern bool apply_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
+
+    extern bool
+    apply_frame_data(std::string_view thread_id, uint64_t frame_id, std::function<bool(const data_sample&)> operation);
 
     struct draw_data
     {
-        int width;
-        int height;
+        int    width;
+        int    height;
         double zoom_x = 300.0f;
         double zoom_y = 0.1f;
     };
-    extern void draw_frame_data(std::string_view thread_id, const draw_data& dd);
+    extern void draw_overall_data(std::string_view thread_id, const draw_data& dd);
+    extern void draw_frame_data(std::string_view thread_id, uint64_t frame_id, const draw_data& dd);
 
 } // namespace prof

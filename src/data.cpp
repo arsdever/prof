@@ -63,12 +63,27 @@ namespace prof
     frame::frame()
         : _frame_data {}
         , _id { _id_counter++ }
+        , _start { std::chrono::steady_clock::now() }
     {
     }
 
     void frame::add(data_sample sample) { _frame_data.push_back(std::move(sample)); }
 
     std::vector<data_sample> const& frame::samples() const { return _frame_data; }
+
+    void frame::mark_finished()
+    {
+        _stop     = std::chrono::steady_clock::now();
+        _finished = true;
+    }
+
+    bool frame::is_finished() const { return _finished; }
+
+    frame::id_t frame::get_id() const { return _id; }
+
+    std::chrono::steady_clock::time_point frame::start() const { return _start; }
+
+    std::chrono::steady_clock::time_point frame::end() const { return _stop; }
 
     frame::id_t frame::_id_counter = 0;
 

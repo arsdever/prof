@@ -1,8 +1,8 @@
 #pragma once
 
+#include <deque>
 #include <functional>
 #include <memory>
-#include <deque>
 #include <stack>
 #include <string>
 #include <string_view>
@@ -111,6 +111,8 @@ namespace prof
          */
         void frame_pop();
 
+        bool for_each_frame(std::function<bool(const frame&)> operation) const;
+
         /**
          * @brief Executes a function for each frame in the profiler.
          *
@@ -122,6 +124,8 @@ namespace prof
          * @returns true if the operation was executed for all of the frames, false otherwise.
          */
         bool for_each_data(std::function<bool(const data_sample&)> operation) const;
+
+        bool for_each_data_frame(uint64_t frame_id, std::function<bool(const data_sample&)> operation) const;
 
 #pragma region base_profiler
 
@@ -135,7 +139,7 @@ namespace prof
 
         std::string             _id;
         std::stack<data_sample> _stack;
-        std::deque<frame>      _frames;
+        std::deque<frame>       _frames;
         friend struct frame_keeper;
         std::unique_ptr<frame_keeper> _frame_keeper;
     };

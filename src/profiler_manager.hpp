@@ -39,6 +39,8 @@ namespace prof
          */
         static std::shared_ptr<thread_local_profiler> for_thread(std::string_view thread_id);
 
+        static bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> e);
+
         /**
          * @brief Applies the operation to all of the data available for the given thread.
          *
@@ -46,7 +48,11 @@ namespace prof
          * @param operation the operation to apply to the data.
          * @return true if the operation was executed for all of the data available, false otherwise.
          */
-        static bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
+        static bool apply_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation);
+
+        static bool apply_frame_data(std::string_view                        thread_id,
+                                     uint64_t                                frame_id,
+                                     std::function<bool(const data_sample&)> operation);
 
         /**
          * @brief Get the vector of threads that have been profiled.

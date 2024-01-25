@@ -1,6 +1,6 @@
-#include "profiler_manager.hpp"
-
 #include <thread>
+
+#include "profiler_manager.hpp"
 
 #include "thread_local_profiler.hpp"
 
@@ -51,10 +51,24 @@ namespace prof
         return _thread_profilers[ std::hash<std::string_view> {}(thread_id) ];
     }
 
-    bool profiler_manager::apply_for_data(std::string_view thread_name, std::function<bool(const data_sample&)> e)
+    bool profiler_manager::apply_frames(std::string_view thread_name, std::function<bool(const frame&)> e)
+    {
+        auto thread_profiler = for_thread(thread_name);
+        return thread_profiler->for_each_frame(e);
+    }
+
+    bool profiler_manager::apply_data(std::string_view thread_name, std::function<bool(const data_sample&)> e)
     {
         auto thread_profiler = for_thread(thread_name);
         return thread_profiler->for_each_data(e);
+    }
+
+    bool profiler_manager::apply_frame_data(std::string_view                        thread_name,
+                                            uint64_t                                frame_id,
+                                            std::function<bool(const data_sample&)> e)
+    {
+        auto thread_profiler = for_thread(thread_name);
+        return thread_profiler->for_each_data_frame(frame_id, e);
     }
 
     std::vector<std::string> profiler_manager::known_threads()

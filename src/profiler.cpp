@@ -18,9 +18,20 @@ namespace prof
 
     std::vector<std::string> known_threads() { return profiler_manager::known_threads(); }
 
-    bool apply_for_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation)
+    bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> operation)
     {
-        return profiler_manager::apply_for_data(thread_id, operation);
+        return profiler_manager::apply_frames(thread_id, operation);
+    }
+
+    bool apply_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation)
+    {
+        return profiler_manager::apply_data(thread_id, operation);
+    }
+
+    bool
+    apply_frame_data(std::string_view thread_id, uint64_t frame_id, std::function<bool(const data_sample&)> operation)
+    {
+        return profiler_manager::apply_frame_data(thread_id, frame_id, operation);
     }
 
 } // namespace prof

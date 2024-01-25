@@ -21,7 +21,7 @@ namespace prof
         int   layer;
     };
 
-    struct
+    struct init_context
     {
         bool     _initialized        = false;
         bool     _initialized_shader = false;
@@ -31,48 +31,52 @@ namespace prof
         unsigned prog                = 0;
         unsigned vs                  = 0;
         unsigned fs                  = 0;
-    } init_context;
+    };
 
-    void load_mesh()
+    init_context frames_init_ctx {};
+    init_context overall_init_ctx {};
+
+    void load_mesh(init_context& ctx)
     {
-        if (!init_context._initialized)
+        if (!ctx._initialized)
             {
-                glGenVertexArrays(1, &init_context.vao);
-                glBindVertexArray(init_context.vao);
-                glGenBuffers(1, &init_context.vbo);
-                glGenBuffers(1, &init_context.ebo);
-                glBindBuffer(GL_ARRAY_BUFFER, init_context.vbo);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, init_context.ebo);
+                glGenVertexArrays(1, &ctx.vao);
+                glBindVertexArray(ctx.vao);
+                glGenBuffers(1, &ctx.vbo);
+                glGenBuffers(1, &ctx.ebo);
+                glBindBuffer(GL_ARRAY_BUFFER, ctx.vbo);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ctx.ebo);
                 glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts.data(), GL_STATIC_DRAW);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
                 glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
                 glEnableVertexAttribArray(0);
-                init_context._initialized = true;
+                ctx._initialized = true;
             }
         else
             {
-                glBindVertexArray(init_context.vao);
+                glBindVertexArray(ctx.vao);
                 glEnableVertexAttribArray(0);
             }
     }
 
-    bool load_vertex_shader()
+    template <typename T>
+    bool load_vertex_shader(init_context& ctx)
     {
         int status;
-        if (init_context.vs == 0)
+        if (ctx.vs == 0)
             {
-                init_context.vs   = glCreateShader(GL_VERTEX_SHADER);
-                const char* vsptr = vertex_shader.data();
-                glShaderSource(init_context.vs, 1, &vsptr, 0);
-                glCompileShader(init_context.vs);
-                glGetShaderiv(init_context.vs, GL_COMPILE_STATUS, &status);
+                ctx.vs            = glCreateShader(GL_VERTEX_SHADER);
+                const char* vsptr = T::vertex_shader.data();
+                glShaderSource(ctx.vs, 1, &vsptr, 0);
+                glCompileShader(ctx.vs);
+                glGetShaderiv(ctx.vs, GL_COMPILE_STATUS, &status);
                 if (status == GL_FALSE)
                     {
                         int  log_length = 0;
                         char msg[ 1024 ];
-                        glGetShaderInfoLog(init_context.vs, 1024, &log_length, msg);
-                        glDeleteShader(init_context.vs);
-                        init_context.vs = 0;
+                        glGetShaderInfoLog(ctx.vs, 1024, &log_length, msg);
+                        glDeleteShader(ctx.vs);
+                        ctx.vs = 0;
                         std::cerr << msg;
                         return false;
                     }
@@ -80,23 +84,24 @@ namespace prof
         return true;
     }
 
-    bool load_fragment_shader()
+    template <typename T>
+    bool load_fragment_shader(init_context& ctx)
     {
         int status;
-        if (init_context.fs == 0)
+        if (ctx.fs == 0)
             {
-                init_context.fs   = glCreateShader(GL_FRAGMENT_SHADER);
-                const char* fsptr = fragment_shader.data();
-                glShaderSource(init_context.fs, 1, &fsptr, 0);
-                glCompileShader(init_context.fs);
-                glGetShaderiv(init_context.fs, GL_COMPILE_STATUS, &status);
+                ctx.fs            = glCreateShader(GL_FRAGMENT_SHADER);
+                const char* fsptr = T::fragment_shader.data();
+                glShaderSource(ctx.fs, 1, &fsptr, 0);
+                glCompileShader(ctx.fs);
+                glGetShaderiv(ctx.fs, GL_COMPILE_STATUS, &status);
                 if (status == GL_FALSE)
                     {
                         int  log_length = 0;
                         char msg[ 1024 ];
-                        glGetShaderInfoLog(init_context.fs, 1024, &log_length, msg);
-                        glDeleteShader(init_context.fs);
-                        init_context.fs = 0;
+                        glGetShaderInfoLog(ctx.fs, 1024, &log_length, msg);
+                        glDeleteShader(ctx.fs);
+                        ctx.fs = 0;
                         std::cerr << msg;
                         return false;
                     }
@@ -104,52 +109,103 @@ namespace prof
         return true;
     }
 
-    bool load_program()
+    template <typename T>
+    bool load_program(init_context& ctx)
     {
-        if (!init_context._initialized_shader)
+        if (!ctx._initialized_shader)
             {
-                if (!load_vertex_shader())
+                if (!load_vertex_shader<T>(ctx))
                     {
                         return false;
                     }
-                if (!load_fragment_shader())
+                if (!load_fragment_shader<T>(ctx))
                     {
                         return false;
                     }
                 int status;
-                if (init_context.prog == 0)
+                if (ctx.prog == 0)
                     {
-                        init_context.prog = glCreateProgram();
-                        glAttachShader(init_context.prog, init_context.vs);
-                        glAttachShader(init_context.prog, init_context.fs);
+                        ctx.prog = glCreateProgram();
+                        glAttachShader(ctx.prog, ctx.vs);
+                        glAttachShader(ctx.prog, ctx.fs);
 
-                        glLinkProgram(init_context.prog);
-                        glGetProgramiv(init_context.prog, GL_LINK_STATUS, &status);
+                        glLinkProgram(ctx.prog);
+                        glGetProgramiv(ctx.prog, GL_LINK_STATUS, &status);
                         if (status == GL_FALSE)
                             {
                                 int  log_length = 0;
                                 char msg[ 1024 ];
-                                glGetProgramInfoLog(init_context.prog, 1024, &log_length, msg);
-                                glDeleteProgram(init_context.prog);
-                                init_context.prog = 0;
+                                glGetProgramInfoLog(ctx.prog, 1024, &log_length, msg);
+                                glDeleteProgram(ctx.prog);
+                                ctx.prog = 0;
                                 std::cerr << msg;
                                 return false;
                             }
                     }
-                glUseProgram(init_context.prog);
-                init_context._initialized_shader = true;
+                glUseProgram(ctx.prog);
+                ctx._initialized_shader = true;
             }
         else
             {
-                glUseProgram(init_context.prog);
+                glUseProgram(ctx.prog);
             }
         return true;
     }
 
-    void draw_frame_data(std::string_view thread_id, const draw_data& dd)
+    void draw_overall_data(std::string_view thread_id, const draw_data& dd)
     {
-        load_mesh();
-        if (!load_program())
+        load_mesh(overall_init_ctx);
+        if (!load_program<overall_shaders>(overall_init_ctx))
+            {
+                return;
+            }
+
+        struct section
+        {
+            float time;
+        };
+
+        std::vector<section> data;
+        prof::apply_frames(thread_id, [ &data ](const prof::frame& fr) -> bool {
+            data.emplace_back(std::chrono::duration_cast<std::chrono::duration<float>>(fr.end() - fr.start()).count());
+            return true;
+        });
+
+        glUniform2f(
+            glGetUniformLocation(overall_init_ctx.prog, "zoom"), static_cast<float>(.01), static_cast<float>(100));
+        glUniform2f(glGetUniformLocation(overall_init_ctx.prog, "_screen_size"),
+                    static_cast<float>(dd.width),
+                    static_cast<float>(dd.height));
+
+        // glUniform1f(glGetUniformLocation(init_context.prog, "time_offset"), offset);
+        glViewport(0, 0, dd.width, dd.height);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        size_t i = 0;
+        int    k = 0;
+        while (i < data.size())
+            {
+                size_t j = 0;
+                while (i < data.size() && j < MAX_SECTIONS_COUNT)
+                    {
+                        glUniform1f(
+                            glGetUniformLocation(overall_init_ctx.prog,
+                                                 (std::string("_sections[") + std::to_string(j) + "].time").c_str()),
+                            data[ i ].time);
+                        ++i;
+                        ++j;
+                    }
+
+                glUniform1i(glGetUniformLocation(overall_init_ctx.prog, "_frame_offset"), k);
+                glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, std::min<size_t>(j, MAX_SECTIONS_COUNT));
+                ++k;
+            }
+    }
+
+    void draw_frame_data(std::string_view thread_id, uint64_t frame_id, const draw_data& dd)
+    {
+        load_mesh(frames_init_ctx);
+        if (!load_program<frame_shaders>(frames_init_ctx))
             {
                 return;
             }
@@ -164,7 +220,7 @@ namespace prof
         std::vector<section_double> elements_d;
         std::vector<section>        elements;
         double                      offset = INFINITY;
-        prof::apply_for_data(thread_id, [ &offset, &elements_d ](const prof::data_sample& sample) -> bool {
+        prof::apply_frame_data(thread_id, frame_id, [ &offset, &elements_d ](const prof::data_sample& sample) -> bool {
             elements_d.push_back(
                 { std::chrono::duration_cast<std::chrono::duration<double>>(sample.start().time_since_epoch()).count(),
                   std::chrono::duration_cast<std::chrono::duration<double>>(sample.end() - sample.start()).count(),
@@ -178,10 +234,10 @@ namespace prof
                 elements.emplace_back(elem.start - offset, elem.duration, elem.layer);
             }
 
-        glUniform2f(glGetUniformLocation(init_context.prog, "zoom"),
+        glUniform2f(glGetUniformLocation(frames_init_ctx.prog, "zoom"),
                     static_cast<float>(dd.zoom_x),
                     static_cast<float>(dd.zoom_y));
-        glUniform2f(glGetUniformLocation(init_context.prog, "_screen_size"),
+        glUniform2f(glGetUniformLocation(frames_init_ctx.prog, "_screen_size"),
                     static_cast<float>(dd.width),
                     static_cast<float>(dd.height));
 
@@ -189,13 +245,13 @@ namespace prof
         for (int i = 0; i < elements.size() % MAX_SECTIONS_COUNT; ++i)
             {
                 glUniform1f(
-                    glGetUniformLocation(init_context.prog,
+                    glGetUniformLocation(frames_init_ctx.prog,
                                          (std::string("_sections[") + std::to_string(i) + "].duration").c_str()),
                     elements[ i ].duration);
-                glUniform1f(glGetUniformLocation(init_context.prog,
+                glUniform1f(glGetUniformLocation(frames_init_ctx.prog,
                                                  (std::string("_sections[") + std::to_string(i) + "].start").c_str()),
                             elements[ i ].start);
-                glUniform1i(glGetUniformLocation(init_context.prog,
+                glUniform1i(glGetUniformLocation(frames_init_ctx.prog,
                                                  (std::string("_sections[") + std::to_string(i) + "].layer").c_str()),
                             elements[ i ].layer);
             }

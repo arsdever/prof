@@ -171,8 +171,7 @@ namespace prof
             return true;
         });
 
-        glUniform2f(
-            glGetUniformLocation(overall_init_ctx.prog, "zoom"), static_cast<float>(.01), static_cast<float>(100));
+        glUniform2f(glGetUniformLocation(overall_init_ctx.prog, "zoom"), dd.zoom_x, dd.zoom_y);
         glUniform2f(glGetUniformLocation(overall_init_ctx.prog, "_screen_size"),
                     static_cast<float>(dd.width),
                     static_cast<float>(dd.height));

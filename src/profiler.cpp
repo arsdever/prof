@@ -32,6 +32,8 @@ namespace prof
         return profiler_manager::available_frames_count(thread_id);
     }
 
+    const frame* longest_frame(std::string_view thread_id) { return profiler_manager::longest_frame(thread_id); }
+
     bool apply_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation)
     {
         return profiler_manager::apply_data(thread_id, operation);

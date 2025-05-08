@@ -84,6 +84,12 @@ namespace prof
         return thread_profiler->frame_count();
     }
 
+    const frame* profiler_manager::longest_frame(std::string_view thread_id)
+    {
+        auto thread_profiler = for_thread(thread_id);
+        return thread_profiler->longest_frame();
+    }
+
     bool profiler_manager::apply_data(std::string_view thread_name, std::function<bool(const data_sample&)> e)
     {
         auto thread_profiler = for_thread(thread_name);

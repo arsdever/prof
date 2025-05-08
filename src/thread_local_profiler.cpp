@@ -57,11 +57,28 @@ namespace prof
                 _stack.pop();
             }
         _frames.back().mark_finished();
+
+        // Check if this is the longest
+        if (_longest_frame == nullptr)
+            {
+                _longest_frame = &_frames.back();
+            }
+        else
+            {
+                auto duration         = _frames.back().end() - _frames.back().start();
+                auto longest_duration = _longest_frame->end() - _longest_frame->start();
+                if (duration > longest_duration)
+                    {
+                        _longest_frame = &_frames.back();
+                    }
+            }
     }
 
     void thread_local_profiler::finish() { stack_pop(); }
 
     size_t thread_local_profiler::frame_count() const { return _frames.size(); }
+
+    const frame* thread_local_profiler::longest_frame() const { return _longest_frame; }
 
     bool thread_local_profiler::for_each_frame(std::function<bool(const frame&)> operation) const
     {

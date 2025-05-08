@@ -56,6 +56,14 @@ namespace prof
     extern bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> operation);
 
     /**
+     * @brief Retrieves the number of frames that have been profiled for the given thread.
+     *
+     * @param thread_id the id of the thread to get the data for.
+     * @return size_t the number of frames that have been profiled for the given thread.
+     */
+    extern size_t available_frames_count(std::string_view thread_id);
+
+    /**
      * @brief Retrieves the frame that has the longest duration for the given thread.
      * 
      * @param thread_id the id of the thread to get the data for.

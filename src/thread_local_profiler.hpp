@@ -113,6 +113,8 @@ namespace prof
 
         size_t frame_count() const;
 
+        const frame* longest_frame() const;
+
         bool for_each_frame(std::function<bool(const frame&)> operation) const;
 
         /**
@@ -142,6 +144,7 @@ namespace prof
         std::string             _id;
         std::stack<data_sample> _stack;
         std::deque<frame>       _frames;
+        const frame*            _longest_frame { nullptr };
         friend struct frame_keeper;
         std::unique_ptr<frame_keeper> _frame_keeper;
     };

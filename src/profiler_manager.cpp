@@ -78,6 +78,12 @@ namespace prof
         return thread_profiler->for_each_frame(e);
     }
 
+    size_t profiler_manager::available_frames_count(std::string_view thread_id)
+    {
+        auto thread_profiler = for_thread(thread_id);
+        return thread_profiler->frame_count();
+    }
+
     bool profiler_manager::apply_data(std::string_view thread_name, std::function<bool(const data_sample&)> e)
     {
         auto thread_profiler = for_thread(thread_name);

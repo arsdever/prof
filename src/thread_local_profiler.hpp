@@ -111,6 +111,8 @@ namespace prof
          */
         void frame_pop();
 
+        size_t frame_count() const;
+
         bool for_each_frame(std::function<bool(const frame&)> operation) const;
 
         /**

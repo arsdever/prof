@@ -61,6 +61,8 @@ namespace prof
 
     void thread_local_profiler::finish() { stack_pop(); }
 
+    size_t thread_local_profiler::frame_count() const { return _frames.size(); }
+
     bool thread_local_profiler::for_each_frame(std::function<bool(const frame&)> operation) const
     {
         for (const auto& fr : _frames)

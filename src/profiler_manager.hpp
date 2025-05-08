@@ -52,6 +52,15 @@ namespace prof
         static bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> e);
 
         /**
+         * @brief Retrieves the number of frames that have been profiled for the given thread.
+         *
+         * @param thread_id the id of the thread to get the data for.
+         * @return size_t the number of frames that have been profiled for the given thread.
+         */
+        static size_t available_frames_count(std::string_view thread_id);
+
+
+        /**
          * @brief Applies the operation to all of the data available for the given thread.
          *
          * @param thread_id the id of the thread to get the data for.

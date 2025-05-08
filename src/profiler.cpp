@@ -27,6 +27,11 @@ namespace prof
         return profiler_manager::apply_frames(thread_id, operation);
     }
 
+    size_t available_frames_count(std::string_view thread_id)
+    {
+        return profiler_manager::available_frames_count(thread_id);
+    }
+
     bool apply_data(std::string_view thread_id, std::function<bool(const data_sample&)> operation)
     {
         return profiler_manager::apply_data(thread_id, operation);

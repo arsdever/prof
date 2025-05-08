@@ -54,6 +54,14 @@ namespace prof
     extern std::vector<std::string> known_threads();
 
     extern bool apply_frames(std::string_view thread_id, std::function<bool(const frame&)> operation);
+
+    /**
+     * @brief Retrieves the frame that has the longest duration for the given thread.
+     * 
+     * @param thread_id the id of the thread to get the data for.
+     * @return const frame* the frame that has the longest duration for the given thread.
+     */
+    extern const frame* longest_frame(std::string_view thread_id);
     /**
      * @brief Applies the operation to all of the data available for the given thread.
      *

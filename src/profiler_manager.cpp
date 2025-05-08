@@ -22,16 +22,37 @@ namespace prof
     namespace
     {
         std::mutex thread_specific_profiler_mutex;
-    }
+        static struct empty_profiler : base_profiler
+        {
+            void finish() override
+            {
+                // do nothing
+            }
+        } empty_profiler {};
+    } // namespace
+
+    void profiler_manager::start() { _enabled = true; }
+
+    void profiler_manager::stop() { _enabled = false; }
 
     profiler_scope_keeper profiler_manager::start_profiling(std::string_view function_name)
     {
+        if (!_enabled)
+            {
+                return profiler_scope_keeper { empty_profiler };
+            }
+
         auto thread_profiler = for_thread(std::to_string(std::this_thread::get_id()));
         return thread_profiler->stack_push(function_name);
     }
 
     profiler_scope_keeper profiler_manager::start_frame(std::string_view function_name)
     {
+        if (!_enabled)
+            {
+                return profiler_scope_keeper { empty_profiler };
+            }
+
         auto thread_profiler = for_thread(std::to_string(std::this_thread::get_id()));
         return thread_profiler->frame_push(function_name);
     }
@@ -83,5 +104,6 @@ namespace prof
     }
 
     std::unordered_map<size_t, std::shared_ptr<thread_local_profiler>> profiler_manager::_thread_profilers;
+    bool                                                               profiler_manager::_enabled;
 
 } // namespace prof

@@ -11,6 +11,16 @@
 namespace prof
 {
     /**
+     * @brief Starts or resumes the profiler.
+     */
+    extern void start();
+
+    /**
+     * @brief Pauses the profiler.
+     */
+    extern void stop();
+
+    /**
      * @brief Starts a profiling of the current stack
      *
      * This is the main function of the library. It can be used from anywhere in the code to profile the current stack.

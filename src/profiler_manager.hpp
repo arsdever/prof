@@ -21,6 +21,16 @@ namespace prof
     {
     public:
         /**
+         * @brief Starts or resumes the profiler.
+         */
+        static void start();
+
+        /**
+         * @brief Pauses the profiler.
+         */
+        static void stop();
+
+        /**
          * @brief Start profiling for the current function.
          *
          * This function is not supposed to be called directly. Use the @c profile function instead.
@@ -63,6 +73,7 @@ namespace prof
 
     protected:
         static std::unordered_map<size_t, std::shared_ptr<thread_local_profiler>> _thread_profilers;
+        static bool                                                               _enabled;
     };
 
 } // namespace prof

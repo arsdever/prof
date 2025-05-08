@@ -6,6 +6,10 @@
 namespace prof
 {
 
+    void start() { profiler_manager::start(); }
+
+    void stop() { profiler_manager::stop(); }
+
     profiler_scope_keeper profile(std::string_view function_name)
     {
         return profiler_manager::start_profiling(function_name);

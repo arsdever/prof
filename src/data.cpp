@@ -67,7 +67,14 @@ namespace prof
     {
     }
 
-    void frame::add(data_sample sample) { _frame_data.push_back(std::move(sample)); }
+    void frame::add(data_sample sample)
+    {
+        if (sample.depth() > _max_depth)
+            {
+                _max_depth = sample.depth();
+            }
+        _frame_data.push_back(std::move(sample));
+    }
 
     std::vector<data_sample> const& frame::samples() const { return _frame_data; }
 
@@ -84,6 +91,8 @@ namespace prof
     std::chrono::steady_clock::time_point frame::start() const { return _start; }
 
     std::chrono::steady_clock::time_point frame::end() const { return _stop; }
+
+    size_t frame::max_depth() const { return _max_depth; }
 
     frame::id_t frame::_id_counter = 0;
 

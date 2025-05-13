@@ -55,6 +55,7 @@ namespace prof
         id_t                                  get_id() const;
         std::chrono::steady_clock::time_point start() const;
         std::chrono::steady_clock::time_point end() const;
+        size_t                                max_depth() const;
 
     private:
         std::vector<data_sample>              _frame_data;
@@ -62,6 +63,7 @@ namespace prof
         bool                                  _finished { false };
         std::chrono::steady_clock::time_point _start;
         std::chrono::steady_clock::time_point _stop;
+        size_t                                _max_depth { 0 };
 
         static id_t _id_counter;
     };

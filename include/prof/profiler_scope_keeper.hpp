@@ -15,21 +15,6 @@ namespace prof
      */
     class profiler_scope_keeper
     {
-    private:
-        /**
-         * @brief Copy constructor.
-         *
-         * Deleted since the profiler is not copyable.
-         */
-        profiler_scope_keeper(const profiler_scope_keeper&) = delete;
-
-        /**
-         * @brief Copy assignment operator.
-         *
-         * Deleted since the profiler is not copyable.
-         */
-        profiler_scope_keeper(profiler_scope_keeper&&) = delete;
-
     public:
         /**
          * @brief Constructor.
@@ -45,8 +30,29 @@ namespace prof
          */
         ~profiler_scope_keeper();
 
+        /**
+         * @brief Move constructor.
+         *
+         * Used to allow profiling a scope without a need for explicit scopes. This is helpful when there is a
+         * instantiation happening, which needs separate profiling.
+         * In other words, this is a convenience function to finish the @c other scope and start a new one.
+         *
+         * @param other the profiler to move.
+         *
+         * @return the moved profiler.
+         */
+        profiler_scope_keeper& operator=(profiler_scope_keeper&& other) noexcept;
+
+        /**
+         * @brief Finish the profiling of the scope.
+         */
+        void finish();
+
     private:
-        base_profiler& _ref;
+        profiler_scope_keeper& operator=(const profiler_scope_keeper& other) = delete;
+
+    private:
+        base_profiler* _ref;
     };
 
 } // namespace prof
